@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ردیاب عادت</title>
+<meta name="theme-color" content="#1f7a6d">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+@font-face{font-family:"Vazirmatn";src:url(fonts/vazirmatn.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--bg:#eaf0ee;--card:#fff;--ink:#17272b;--mute:#5d7076;--line:#d3dedb;--acc:#1f7a6d;--acc2:#e8a600;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a1d;--card:#182a2e;--ink:#e6f0ee;--mute:#93a9ad;--line:#294146;--acc:#3fc0ae;--acc2:#f2b933;--on:#0f1a1d}}
+:root[data-theme="dark"]{--bg:#0f1a1d;--card:#182a2e;--ink:#e6f0ee;--mute:#93a9ad;--line:#294146;--acc:#3fc0ae;--acc2:#f2b933;--on:#0f1a1d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,sans-serif;line-height:1.7}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.9rem;font-weight:800;margin:8px 0 2px}
+.sub{color:var(--mute);margin:0 0 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.nav{display:flex;align-items:center;gap:8px}
+button{font:inherit;cursor:pointer;color:inherit}
+.ib{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card)}
+.ib:focus-visible,.cell:focus-visible,.add button:focus-visible,input:focus-visible,.del:focus-visible{outline:3px solid var(--acc2);outline-offset:2px}
+.range{font-weight:600;min-width:150px;text-align:center}
+.sum{background:var(--acc);color:var(--on);border-radius:20px;padding:18px 20px;margin-bottom:16px}
+.sum b{font-size:2.2rem;font-weight:800}
+.bar{height:10px;background:rgba(255,255,255,.28);border-radius:9px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc2);border-radius:9px;transition:width .35s}
+.grid{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{padding:8px 4px;text-align:center;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-weight:600;font-size:.85rem;color:var(--mute)}
+th.today{color:var(--acc);font-weight:800}
+td.name,th.name{text-align:right;padding-inline:14px;min-width:130px;font-weight:600}
+td.name small{display:block;color:var(--mute);font-weight:400;font-size:.78rem}
+.cell{width:34px;height:34px;border-radius:10px;border:2px solid var(--line);background:transparent;font-weight:800;color:var(--on)}
+.cell.on{background:var(--acc);border-color:var(--acc)}
+.cell.tdy{border-color:var(--acc)}
+.del{border:0;background:none;color:var(--mute);font-size:1.1rem;padding:4px 8px}
+.add{display:flex;gap:8px;margin-top:16px}
+input{flex:1;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.add button{padding:0 20px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font-weight:600}
+.empty{padding:28px 16px;text-align:center;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+body{padding-bottom:76px;-webkit-tap-highlight-color:transparent}
+button,a{touch-action:manipulation}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav a{flex:1;text-align:center;padding:13px 0;color:var(--mute);text-decoration:none;font-weight:600}
+nav a[aria-current]{color:var(--acc);font-weight:800}
+nav a:focus-visible{outline:3px solid var(--acc2);outline-offset:-3px}
+table{min-width:0!important}
+.cell{width:28px!important;height:28px!important;border-radius:8px!important}
+td.name,th.name{padding-inline:8px!important;min-width:72px!important;max-width:96px;font-size:.88rem!important}
+th,td{padding:8px 2px!important}
+.del{padding:4px!important;font-size:.95rem!important}
+@media (max-width:400px){main{padding-left:10px!important;padding-right:10px!important}}
+</style>
+</head>
+<body>
+<main>
+  <h1>ردیاب عادت</h1>
+  <p class="sub" id="today"></p>
+  <div class="top">
+    <div class="nav">
+      <button class="ib" id="next" aria-label="هفته بعد">›</button>
+      <span class="range" id="range"></span>
+      <button class="ib" id="prev" aria-label="هفته قبل">‹</button>
+    </div>
+    <button class="ib" id="now" aria-label="امروز" title="برگشت به هفته جاری">●</button>
+  </div>
+  <div class="sum" id="sum"></div>
+  <div class="grid" id="grid"></div>
+  <div class="add">
+    <input id="in" placeholder="عادت جدید، مثلاً «۳۰ دقیقه مطالعه»" maxlength="40" aria-label="نام عادت جدید">
+    <button id="addb">افزودن عادت</button>
+  </div>
+</main>
+<nav aria-label="بخش‌ها"><a href="index.html" aria-current="page">ردیاب عادت</a><a href="checklist.html">چک‌لیست روزانه</a></nav>
+<script>
+var KEY="habit-tracker-v1", S={habits:[],off:0};
+try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.habits))S.habits=p.habits}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({habits:S.habits}))}catch(e){}}
+var fa=function(o){return new Intl.DateTimeFormat("fa-IR-u-ca-persian",o)};
+var nf=new Intl.NumberFormat("fa-IR");
+function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function esc(s){return s.replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function today(){var d=new Date();d.setHours(12,0,0,0);return d}
+function weekDays(){var t=today(),start=new Date(t);start.setDate(t.getDate()-((t.getDay()+1)%7)+S.off*7);
+  var a=[];for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);a.push(d)}return a}
+function streak(h){var d=today();if(!h.done[key(d)])d.setDate(d.getDate()-1);var n=0;
+  while(h.done[key(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function render(){
+  var days=weekDays(),tk=key(today());
+  document.getElementById("today").textContent=fa({weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(today());
+  document.getElementById("range").textContent=fa({day:"numeric",month:"long"}).format(days[0])+" تا "+fa({day:"numeric",month:"long"}).format(days[6]);
+  var total=S.habits.length*7,done=0;
+  S.habits.forEach(function(h){days.forEach(function(d){if(h.done[key(d)])done++})});
+  var pct=total?Math.round(done/total*100):0;
+  document.getElementById("sum").innerHTML=total?
+    "<b>"+nf.format(pct)+"٪</b> از عادت‌های این هفته انجام شده<div class='bar'><i style='width:"+pct+"%'></i></div>":
+    "هنوز عادتی اضافه نکرده‌ای. اولین عادتت را پایین صفحه بنویس.";
+  if(!S.habits.length){document.getElementById("grid").innerHTML="<div class='empty'>عادت‌ها اینجا نمایش داده می‌شوند.</div>";return}
+  var h="<table><thead><tr><th class='name'>عادت</th>";
+  days.forEach(function(d){h+="<th class='"+(key(d)===tk?"today":"")+"'>"+fa({weekday:"short"}).format(d)+"<br>"+fa({day:"numeric"}).format(d)+"</th>"});
+  h+="<th></th></tr></thead><tbody>";
+  S.habits.forEach(function(x){
+    var s=streak(x);
+    h+="<tr><td class='name'>"+esc(x.name)+"<small>"+(s?"روزِ متوالی: "+nf.format(s):"شروع کن")+"</small></td>";
+    days.forEach(function(d){var k=key(d),on=x.done[k];
+      h+="<td><button class='cell"+(on?" on":"")+(k===tk?" tdy":"")+"' data-h='"+x.id+"' data-d='"+k+"' aria-pressed='"+(!!on)+"' aria-label='"+esc(x.name)+"، "+fa({weekday:"long",day:"numeric",month:"long"}).format(d)+"'>"+(on?"✓":"")+"</button></td>"});
+    h+="<td><button class='del' data-x='"+x.id+"' aria-label='حذف "+esc(x.name)+"'>✕</button></td></tr>"});
+  document.getElementById("grid").innerHTML=h+"</tbody></table>";
+}
+document.getElementById("grid").addEventListener("click",function(e){
+  var c=e.target.closest(".cell"),x=e.target.closest(".del");
+  if(c){var hb=S.habits.find(function(z){return z.id==c.dataset.h});if(hb){var k=c.dataset.d;if(hb.done[k])delete hb.done[k];else hb.done[k]=1;save();render()}}
+  else if(x){var hb2=S.habits.find(function(z){return z.id==x.dataset.x});
+    if(hb2&&confirm("عادت «"+hb2.name+"» حذف شود؟")){S.habits=S.habits.filter(function(z){return z!==hb2});save();render()}}
+});
+function add(){var i=document.getElementById("in"),v=i.value.trim();if(!v)return;
+  S.habits.push({id:Date.now(),name:v,done:{}});i.value="";save();render()}
+document.getElementById("addb").onclick=add;
+document.getElementById("in").addEventListener("keydown",function(e){if(e.key==="Enter")add()});
+document.getElementById("prev").onclick=function(){S.off--;render()};
+document.getElementById("next").onclick=function(){S.off++;render()};
+document.getElementById("now").onclick=function(){S.off=0;render()};
+render();
+</script>
+</body>
+</html>
