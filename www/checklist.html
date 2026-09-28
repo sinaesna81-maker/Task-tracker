@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>چک‌لیست روزانه</title>
+<meta name="theme-color" content="#1f7a6d">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+@font-face{font-family:"Vazirmatn";src:url(fonts/vazirmatn.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--bg:#eaf0ee;--card:#fff;--ink:#17272b;--mute:#5d7076;--line:#d3dedb;--acc:#1f7a6d;--acc2:#e8a600;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a1d;--card:#182a2e;--ink:#e6f0ee;--mute:#93a9ad;--line:#294146;--acc:#3fc0ae;--acc2:#f2b933;--on:#0f1a1d}}
+:root[data-theme="dark"]{--bg:#0f1a1d;--card:#182a2e;--ink:#e6f0ee;--mute:#93a9ad;--line:#294146;--acc:#3fc0ae;--acc2:#f2b933;--on:#0f1a1d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Vazirmatn",Tahoma,sans-serif;line-height:1.7}
+main{max-width:560px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.9rem;font-weight:800;margin:8px 0 2px}
+.sub{color:var(--mute);margin:0 0 18px}
+button{font:inherit;cursor:pointer;color:inherit}
+.sum{background:var(--acc);color:var(--on);border-radius:20px;padding:18px 20px;margin-bottom:16px}
+.sum b{font-size:2.2rem;font-weight:800}
+.bar{height:10px;background:rgba(255,255,255,.28);border-radius:9px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc2);border-radius:9px;transition:width .35s}
+ul{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+li:last-child{border-bottom:0}
+.chk{width:30px;height:30px;flex:none;border-radius:9px;border:2px solid var(--line);background:transparent;color:var(--on);font-weight:800}
+.on .chk{background:var(--acc);border-color:var(--acc)}
+.t{flex:1;font-weight:600}
+.on .t{color:var(--mute);text-decoration:line-through}
+.del{border:0;background:none;color:var(--mute);font-size:1.1rem;padding:4px 8px}
+.chk:focus-visible,.del:focus-visible,input:focus-visible,.add button:focus-visible,.clr:focus-visible{outline:3px solid var(--acc2);outline-offset:2px}
+.empty{padding:28px 16px;text-align:center;color:var(--mute)}
+.add{display:flex;gap:8px;margin-top:16px}
+input{flex:1;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.add button{padding:0 20px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font-weight:600}
+.clr{margin-top:12px;border:0;background:none;color:var(--mute);text-decoration:underline;padding:4px 0}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+body{padding-bottom:76px;-webkit-tap-highlight-color:transparent}
+button,a{touch-action:manipulation}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav a{flex:1;text-align:center;padding:13px 0;color:var(--mute);text-decoration:none;font-weight:600}
+nav a[aria-current]{color:var(--acc);font-weight:800}
+nav a:focus-visible{outline:3px solid var(--acc2);outline-offset:-3px}
+</style>
+</head>
+<body>
+<main>
+  <h1>چک‌لیست روزانه</h1>
+  <p class="sub" id="today"></p>
+  <div class="sum" id="sum"></div>
+  <ul id="list"></ul>
+  <div class="add">
+    <input id="in" placeholder="کار جدید، مثلاً «ورزش صبحگاهی»" maxlength="60" aria-label="نام کار جدید">
+    <button id="addb">افزودن کار</button>
+  </div>
+  <button class="clr" id="clr">برداشتن همهٔ تیک‌های امروز</button>
+</main>
+<nav aria-label="بخش‌ها"><a href="index.html">ردیاب عادت</a><a href="checklist.html" aria-current="page">چک‌لیست روزانه</a></nav>
+<script>
+var KEY="daily-checklist-v1",S={items:[],done:{}};
+try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);if(p&&Array.isArray(p.items)){S.items=p.items;S.done=p.done||{}}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var nf=new Intl.NumberFormat("fa-IR");
+function dk(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function esc(s){return s.replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function render(){
+  var k=dk(),d=S.done[k]||{};
+  document.getElementById("today").textContent=new Intl.DateTimeFormat("fa-IR-u-ca-persian",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date());
+  var n=S.items.length,c=S.items.filter(function(x){return d[x.id]}).length,pct=n?Math.round(c/n*100):0;
+  document.getElementById("sum").innerHTML=n?
+    "<b>"+nf.format(c)+" از "+nf.format(n)+"</b> کار انجام شده"+(c===n?" — امروز همه‌چیز تمام شد":"")+"<div class='bar'><i style='width:"+pct+"%'></i></div>":
+    "کاری در لیست نیست. اولین کار امروزت را پایین صفحه بنویس.";
+  document.getElementById("list").innerHTML=n?S.items.map(function(x){var on=d[x.id];
+    return "<li class='"+(on?"on":"")+"'><button class='chk' data-i='"+x.id+"' aria-pressed='"+(!!on)+"' aria-label='"+esc(x.name)+"'>"+(on?"✓":"")+"</button><span class='t'>"+esc(x.name)+"</span><button class='del' data-x='"+x.id+"' aria-label='حذف "+esc(x.name)+"'>✕</button></li>"}).join(""):
+    "<li><div class='empty' style='width:100%'>لیست خالی است.</div></li>";
+}
+document.getElementById("list").addEventListener("click",function(e){
+  var c=e.target.closest(".chk"),x=e.target.closest(".del"),k=dk();
+  if(c){S.done[k]=S.done[k]||{};var i=c.dataset.i;if(S.done[k][i])delete S.done[k][i];else S.done[k][i]=1;save();render()}
+  else if(x){var it=S.items.find(function(z){return z.id==x.dataset.x});
+    if(it&&confirm("کار «"+it.name+"» حذف شود؟")){S.items=S.items.filter(function(z){return z!==it});save();render()}}
+});
+function add(){var i=document.getElementById("in"),v=i.value.trim();if(!v)return;S.items.push({id:Date.now(),name:v});i.value="";save();render()}
+document.getElementById("addb").onclick=add;
+document.getElementById("in").addEventListener("keydown",function(e){if(e.key==="Enter")add()});
+document.getElementById("clr").onclick=function(){S.done[dk()]={};save();render()};
+render();
+</script>
+</body>
+</html>
